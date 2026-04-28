@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String      @id @default(uuid())
+  email     String      @unique
+  name      String?
+  portfolios Portfolio[]
+  createdAt DateTime    @default(now())
+}
+
+model Asset {
+  id           String      @id @default(uuid())
+  ticker       String      @unique
+  name         String
+  type         String      // e.g., STOCK, CRYPTO, COMMODITY
+  currentPrice Float
+  history      PriceHistory[]
+  portfolios   PortfolioAsset[]
+}
+
+model PriceHistory {
+  id        String   @id @default(uuid())
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id])
+  price     Float
+  timestamp DateTime @default(now())
+}
+
+model Portfolio {
+  id          String           @id @default(uuid())
+  name        String
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  assets      PortfolioAsset[]
+  allocations AllocationLog[]
+  riskScore   Float?           // Calculated risk score
+  targetReturn Float?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model PortfolioAsset {
+  id          String    @id @default(uuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  assetId     String
+  asset       Asset     @relation(fields: [assetId], references: [id])
+  quantity    Float
+  weight      Float     // Percentage of portfolio
+}
+
+model AllocationLog {
+  id          String    @id @default(uuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  decision    String    // JSON string of the decision logic/RL state
+  previousWeights String // JSON
+  newWeights      String // JSON
+  reason      String?   // AI-generated reasoning
+  timestamp   DateTime  @default(now())
+}
