@@ -13,6 +13,12 @@
     "Quantis",
     "gsap",
     "glassmorphism",
-    "Glassmorphism"
+    "Glassmorphism",
+    "Solana"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "PlanExtracted/**"
   ]
 }
